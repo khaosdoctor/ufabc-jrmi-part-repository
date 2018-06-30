@@ -59,7 +59,7 @@ public class PartRepository implements IPartRepository {
   @Override
   public Set<IPart> getPartByName (String name) {
     Set<IPart> partsFound = new HashSet<>();
-    partsFound.stream()
+    this.inventoryParts.stream()
         .filter((part) -> (part.getPartName().equals(name)))
         .forEachOrdered((part) -> partsFound.add(part));
     return partsFound;
