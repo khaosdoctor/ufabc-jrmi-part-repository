@@ -27,7 +27,10 @@ public class PartRepository implements IPartRepository {
 
   @Override
   public IPart getPartById (String partId) {
-    throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+    for (IPart part : this.inventoryParts) {
+      if (part.getPartId().equals(partId)) return part;      
+    }
+    return null;
   }
 
   @Override

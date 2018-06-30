@@ -10,7 +10,7 @@ import java.util.Map;
  *
  * @author khaosdoctor
  */
-public interface IPart {
+public interface IPart extends java.io.Serializable {
 
   /**
    * Obtém o ID da parte
