@@ -18,9 +18,9 @@ public class JRMIPartsSystemServer {
 
   public static void main(String[] args) {
     try {
-      Part minhaParte = new Part("martelo", "um martelo");
-      minhaParte.addSubPart(new Part("cabo", "O cabo de um martelo"), 1);
-      minhaParte.addSubPart(new Part("cabeça", "A cabeça de um martelo"), 1);
+      Part minhaParte = new Part("Martelo", "Um martelo");
+      minhaParte.addSubPart(new Part("Cabo", "O cabo de um martelo"), 1);
+      minhaParte.addSubPart(new Part("Cabeça", "A cabeça de um martelo"), 1);
 
       PartRepository repo = new PartRepository("Armazem0");
       repo.addNewPart(minhaParte);

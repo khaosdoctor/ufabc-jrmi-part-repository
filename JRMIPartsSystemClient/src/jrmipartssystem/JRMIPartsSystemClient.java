@@ -163,8 +163,14 @@ public class JRMIPartsSystemClient {
         say("A peça atual foi resetada, encontre outra usando o comando setp ou getp");
         return;
       }
-      
-      currentPart = (IPart) currentRepository.getPartById(id);
+
+      IPart newPart = (IPart) currentRepository.getPartById(id);
+      if (newPart == null) {
+        say("Parte não encontrada neste repositório");
+        return;
+      }
+
+      currentPart = newPart;
       say(String.format("Parte atual alterada para: %s", id));
     } catch (RemoteException ex) {
       say("Não foi possível encontrar a peça especificada");
@@ -179,7 +185,7 @@ public class JRMIPartsSystemClient {
   private static void say (String message) {
     out.println(String.format(" >> %s", message));
   }
-  
+
   private static boolean isCurrentPartNull () {
     if (currentPart == null) {
       say("Você precisa setar uma peça para trabalhar, use o comando getp ou setp");
@@ -193,12 +199,14 @@ public class JRMIPartsSystemClient {
    */
   private static void bindCommand () {
     prompt("Digite o nome do repositório:");
-    String repoName = input.next();
+    input.nextLine();
+    String repoName = input.nextLine();
     if (repoName.length() <= 0) {
       say("Nome inválido");
       return;
     }
     setRepo(repoName);
+    setPart(null);
   }
 
   private static void listrCommand () {
@@ -223,14 +231,15 @@ public class JRMIPartsSystemClient {
   private static void addpCommand () {
     try {
       prompt("Digite o nome da peça");
-      String partName = input.next();
+      input.nextLine();
+      String partName = input.nextLine();
 
       prompt("Digite a descrição da peça");
-      String partDesc = input.next();
+      String partDesc = input.nextLine();
 
       while (partName.length() <= 0) {
         prompt(" >> ERRO: O nome da peça não pode estar em branco");
-        partName = input.next();
+        partName = input.nextLine();
       }
 
       Part newPart = new Part(partName, partDesc);
@@ -253,6 +262,7 @@ public class JRMIPartsSystemClient {
         currentRepository = (IPartRepository) rmiServer.lookup(repo); // Troca o repositório atual
         listpCommand(); // Roda o comando de lista de peças
       }
+      setRepo(currentRepoName);
     } catch (RemoteException ex) {
       say(String.format("Erro ao listar todas as peças: %s", ex.getMessage()));
     } catch (NotBoundException ex) {
@@ -262,7 +272,8 @@ public class JRMIPartsSystemClient {
 
   private static void setpCommand () {
     prompt("Digite o ID da peça");
-    String partId = input.next();
+    input.nextLine();
+    String partId = input.nextLine();
     if (partId.length() <= 0) {
       return;
     }
@@ -272,7 +283,8 @@ public class JRMIPartsSystemClient {
   private static void getpidCommand () {
     try {
       prompt("Digite o ID da peça");
-      String partId = input.next();
+      input.nextLine();
+      String partId = input.nextLine();
       if (partId.length() <= 0) {
         prompt("ID inválido");
         return;
@@ -294,18 +306,19 @@ public class JRMIPartsSystemClient {
   private static void getpCommand () {
     try {
       prompt("Digite o nome da peça");
-      String partName = input.next();
+      input.nextLine();
+      String partName = input.nextLine();
       if (partName.length() <= 0) {
         prompt("Nome inválido");
         return;
       }
       Set<IPart> partsFound = currentRepository.getPartByName(partName);
-      
+
       if (partsFound.size() <= 0) {
         say("Nenhuma peça com este nome foi encontrada");
         return;
       }
-      
+
       say("Partes encontradas:");
       for (IPart part : partsFound) {
         if (part != null) {
@@ -319,7 +332,7 @@ public class JRMIPartsSystemClient {
   }
 
   private static void describepCommand () {
-    isCurrentPartNull();
+    if (isCurrentPartNull()) return;
 
     say(String.format("%s (ID: %s): %s (%d subpartes)", currentPart.getPartName(), currentPart.getPartId(), currentPart.getPartDescription(), currentPart.listSubparts().size()));
     if (!currentPart.listSubparts().isEmpty()) {
@@ -333,9 +346,9 @@ public class JRMIPartsSystemClient {
 
   private static void removepCommand () {
     try {
-      isCurrentPartNull();
-      
-      currentRepository.removePart(currentPart);
+      if (isCurrentPartNull()) return;
+
+      currentRepository.removePartById(currentPart.getPartId());
       say("Peça removida");
       setPart(null);
     } catch (RemoteException ex) {
@@ -345,9 +358,10 @@ public class JRMIPartsSystemClient {
 
   private static void clearsubCommand () {
     try {
-      isCurrentPartNull();
-      
+      if (isCurrentPartNull()) return;
+
       currentRepository.clearSubPartList(currentPart);
+      setPart(currentPart.getPartId());
     } catch (RemoteException ex) {
       say("Erro ao remover subpartes: " + ex.getMessage());
     }
@@ -355,28 +369,32 @@ public class JRMIPartsSystemClient {
 
   private static void addsubCommand () {
     try {
-      isCurrentPartNull();
-      
+      if (isCurrentPartNull()) return;
+
       prompt("Digite o nome da subpeça");
-      String subName = input.next();
-      
+      input.nextLine();
+      String subName = input.nextLine();
+
       prompt("Digite a descrição da subpeça");
-      String subDesc = input.next();
+      String subDesc = input.nextLine();
       
       prompt("Digite a quantidade de subpeças");
-      int subAmount = input.nextInt();
-      
+      int subAmount = Integer.parseInt(input.nextLine());
+
       while (subName.length() <= 0) {
         prompt("O Nome da subpeça não pode ser nulo");
-        subName = input.next();
+        input.nextLine();
+        subName = input.nextLine();
       }
-      
+
       while (subAmount <= 0) {
         prompt("A quantidade de peças deve ser maior do que 0");
-        subAmount = input.nextInt();
+        input.nextLine();
+        subAmount = Integer.parseInt(input.nextLine());
       }
-      
+
       currentRepository.addSubPart(currentPart, new Part(subName, subDesc), subAmount);
+      setPart(currentPart.getPartId());
     } catch (RemoteException ex) {
       say("Erro ao adicionar subpeça");
     }

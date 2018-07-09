@@ -6,7 +6,6 @@
 package jrmipartssystem;
 
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 /**
@@ -81,13 +80,23 @@ public class PartRepository implements IPartRepository {
 
   @Override
   public boolean clearSubPartList (IPart part) {
-    part.clearSubparts();
+    for (IPart currentPart : this.inventoryParts) {
+      if (part.getPartId().equals(currentPart.getPartId())) {
+        currentPart.clearSubparts();
+        break;
+      }
+    }
     return true;
   }
-  
+
   @Override
-  public boolean addSubPart(IPart part, IPart subpart, int amount) {
-    part.addSubPart(subpart, amount);
+  public boolean addSubPart (IPart part, IPart subpart, int amount) {
+    for (IPart currentPart : this.inventoryParts) {
+      if (part.getPartId().equals(currentPart.getPartId())) {
+        currentPart.addSubPart(subpart, amount);
+        break;
+      }
+    }
     return true;
   }
 

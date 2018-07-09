@@ -14,6 +14,12 @@
 
 ### Sistema *nix
 
-- Execute o bash de inicialização
+- Execute `initRMI.sh` para inicializar o Registro RMI (é importante que você execute este comando de dentro da pasta raiz)
+- Execute `initServer.sh` para carregar o servidor de repositórios
+- Execute `initClient.sh` para iniciar o programa
 
-### Comandos
+Faça isso em três sessões de terminais separadas
+
+### Comandos disponíveis
+
+Digite `help` na linha de comando do client para ver os comandos disponíveis

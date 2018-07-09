@@ -19,7 +19,7 @@ public class Part implements IPart {
   private final Map<IPart,Integer> subparts = new HashMap<>();
   
   public Part (String name, String description) {
-    this.partId = String.format("%d_%s", System.currentTimeMillis(), name); // Gera um ID aleatório para a peça
+    this.partId = String.format("%d_%s", System.currentTimeMillis(), name.replace(" ", "_")); // Gera um ID aleatório para a peça
     this.name = name;
     this.description = description;
   }
@@ -82,6 +82,7 @@ public class Part implements IPart {
     return this.subparts;
   }
   
+  @Override
   public boolean clearSubparts () {
     this.subparts.clear();
     return true;
