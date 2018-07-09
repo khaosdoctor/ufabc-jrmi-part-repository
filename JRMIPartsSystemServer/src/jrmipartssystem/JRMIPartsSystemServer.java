@@ -12,7 +12,7 @@ import java.rmi.server.UnicastRemoteObject;
 
 /**
  *
- * @author khaosdoctor
+ * @author Lucas Santos
  */
 public class JRMIPartsSystemServer {
 
@@ -33,18 +33,5 @@ public class JRMIPartsSystemServer {
     } catch (Exception e) {
       System.err.println("Ocorreu um erro no servidor: " + e.toString());
     }
-
-    /*out.println(String.format("Obtendo peças de %s", repo.getRepositoryName()));
-    
-    repo.getAllParts().stream().forEach(part -> {
-      out.println(String.format("- Parte: %s (ID: %s) -> %s", part.getPartName(), part.getPartId(), part.getPartDescription()));
-      
-      if (!part.listSubparts().isEmpty()) {
-        out.println("Subpartes:");
-        part.listSubparts()
-            .entrySet()
-            .forEach((subpart) -> out.println(String.format("---> %d %s: %s", subpart.getValue(), subpart.getKey().getPartName(), subpart.getKey().getPartDescription())));
-      }
-    });*/
   }
 }
