@@ -70,4 +70,6 @@ public interface IPart extends java.io.Serializable {
    * @return {boolean} True se for primitiva ou False caso contrário
    */
   public boolean isPrimitive();
+  
+  public boolean clearSubparts();
 }

@@ -81,4 +81,9 @@ public class Part implements IPart {
     }
     return this.subparts;
   }
+  
+  public boolean clearSubparts () {
+    this.subparts.clear();
+    return true;
+  }
 }

@@ -60,4 +60,8 @@ public interface IPartRepository extends Remote {
   public boolean removePartById(String partId) throws RemoteException;
   
   public String getRepositoryName() throws RemoteException;
+  
+  public boolean clearSubPartList(IPart part) throws RemoteException;
+  
+  public boolean addSubPart(IPart part, IPart subpart, int amount) throws RemoteException;
 }

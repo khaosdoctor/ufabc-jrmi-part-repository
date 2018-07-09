@@ -14,8 +14,10 @@ import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.scene.input.InputMethodTextRun;
 
 /**
  *
@@ -79,9 +81,33 @@ public class JRMIPartsSystemClient {
         case "addp":
           addpCommand();
           break;
-          
+
         case "setp":
           setpCommand();
+          break;
+
+        case "getpid":
+          getpidCommand();
+          break;
+
+        case "getp":
+          getpCommand();
+          break;
+
+        case "describep":
+          describepCommand();
+          break;
+
+        case "removep":
+          removepCommand();
+          break;
+
+        case "clearsub":
+          clearsubCommand();
+          break;
+
+        case "addsub":
+          addsubCommand();
           break;
 
         case "help":
@@ -132,22 +158,36 @@ public class JRMIPartsSystemClient {
 
   private static void setPart (String id) {
     try {
+      if (id == null) {
+        currentPart = null;
+        say("A peça atual foi resetada, encontre outra usando o comando setp ou getp");
+        return;
+      }
+      
       currentPart = (IPart) currentRepository.getPartById(id);
       say(String.format("Parte atual alterada para: %s", id));
     } catch (RemoteException ex) {
       say("Não foi possível encontrar a peça especificada");
     }
   }
-  
+
   private static void prompt (String message) {
     out.println(String.format(" >> %s", message));
     out.print("  > ");
   }
-  
+
   private static void say (String message) {
     out.println(String.format(" >> %s", message));
   }
   
+  private static boolean isCurrentPartNull () {
+    if (currentPart == null) {
+      say("Você precisa setar uma peça para trabalhar, use o comando getp ou setp");
+      return true;
+    }
+    return false;
+  }
+
   /*
    * COMMANDOS
    */
@@ -207,7 +247,7 @@ public class JRMIPartsSystemClient {
     try {
       String currentRepoName = currentRepository.getRepositoryName(); // Guarda o repositório anterior
       String[] allRepos = rmiServer.list(); // Lista todos os repositórios
-      
+
       for (String repo : allRepos) { // Para cada repositório, passa listando as peças
         out.println(String.format("-- Peças do repositório '%s'", repo));
         currentRepository = (IPartRepository) rmiServer.lookup(repo); // Troca o repositório atual
@@ -219,8 +259,126 @@ public class JRMIPartsSystemClient {
       Logger.getLogger(JRMIPartsSystemClient.class.getName()).log(Level.SEVERE, null, ex);
     }
   }
-  
+
   private static void setpCommand () {
-    
+    prompt("Digite o ID da peça");
+    String partId = input.next();
+    if (partId.length() <= 0) {
+      return;
+    }
+    setPart(partId);
+  }
+
+  private static void getpidCommand () {
+    try {
+      prompt("Digite o ID da peça");
+      String partId = input.next();
+      if (partId.length() <= 0) {
+        prompt("ID inválido");
+        return;
+      }
+      IPart part = currentRepository.getPartById(partId);
+
+      if (part != null) {
+        say(String.format("%s (ID: %s): %s (%d subpartes)", part.getPartName(), part.getPartId(), part.getPartDescription(), part.listSubparts().size()));
+        setPart(partId);
+        return;
+      }
+
+      say("Parte não encontrada");
+    } catch (RemoteException ex) {
+      say("Erro ao obter parte: " + ex.getMessage());
+    }
+  }
+
+  private static void getpCommand () {
+    try {
+      prompt("Digite o nome da peça");
+      String partName = input.next();
+      if (partName.length() <= 0) {
+        prompt("Nome inválido");
+        return;
+      }
+      Set<IPart> partsFound = currentRepository.getPartByName(partName);
+      
+      if (partsFound.size() <= 0) {
+        say("Nenhuma peça com este nome foi encontrada");
+        return;
+      }
+      
+      say("Partes encontradas:");
+      for (IPart part : partsFound) {
+        if (part != null) {
+          say(String.format("- %s (ID: %s): %s (%d subpartes)", part.getPartName(), part.getPartId(), part.getPartDescription(), part.listSubparts().size()));
+          return;
+        }
+      }
+    } catch (RemoteException ex) {
+      say("Erro ao obter parte: " + ex.getMessage());
+    }
+  }
+
+  private static void describepCommand () {
+    isCurrentPartNull();
+
+    say(String.format("%s (ID: %s): %s (%d subpartes)", currentPart.getPartName(), currentPart.getPartId(), currentPart.getPartDescription(), currentPart.listSubparts().size()));
+    if (!currentPart.listSubparts().isEmpty()) {
+      say("Subpartes:");
+      currentPart.listSubparts()
+          .entrySet()
+          .forEach((subpart) -> say(String.format(" - %d %s: %s", subpart.getValue(), subpart.getKey().getPartName(), subpart.getKey().getPartDescription())));
+    }
+
+  }
+
+  private static void removepCommand () {
+    try {
+      isCurrentPartNull();
+      
+      currentRepository.removePart(currentPart);
+      say("Peça removida");
+      setPart(null);
+    } catch (RemoteException ex) {
+      say("Erro ao remover peça: " + ex.getMessage());
+    }
+  }
+
+  private static void clearsubCommand () {
+    try {
+      isCurrentPartNull();
+      
+      currentRepository.clearSubPartList(currentPart);
+    } catch (RemoteException ex) {
+      say("Erro ao remover subpartes: " + ex.getMessage());
+    }
+  }
+
+  private static void addsubCommand () {
+    try {
+      isCurrentPartNull();
+      
+      prompt("Digite o nome da subpeça");
+      String subName = input.next();
+      
+      prompt("Digite a descrição da subpeça");
+      String subDesc = input.next();
+      
+      prompt("Digite a quantidade de subpeças");
+      int subAmount = input.nextInt();
+      
+      while (subName.length() <= 0) {
+        prompt("O Nome da subpeça não pode ser nulo");
+        subName = input.next();
+      }
+      
+      while (subAmount <= 0) {
+        prompt("A quantidade de peças deve ser maior do que 0");
+        subAmount = input.nextInt();
+      }
+      
+      currentRepository.addSubPart(currentPart, new Part(subName, subDesc), subAmount);
+    } catch (RemoteException ex) {
+      say("Erro ao adicionar subpeça");
+    }
   }
 }

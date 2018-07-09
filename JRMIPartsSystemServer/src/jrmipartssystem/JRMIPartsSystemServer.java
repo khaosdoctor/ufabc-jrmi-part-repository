@@ -22,13 +22,17 @@ public class JRMIPartsSystemServer {
       minhaParte.addSubPart(new Part("cabo", "O cabo de um martelo"), 1);
       minhaParte.addSubPart(new Part("cabeça", "A cabeça de um martelo"), 1);
 
-      PartRepository repo = new PartRepository();
+      PartRepository repo = new PartRepository("Armazem0");
       repo.addNewPart(minhaParte);
       repo.addNewPart(new Part("Pregos", "Prego simples"));
+      
+      PartRepository repo1 = new PartRepository("Armazem1");
 
       IPartRepository stub = (IPartRepository) UnicastRemoteObject.exportObject(repo, 0);
+      IPartRepository stub1 = (IPartRepository) UnicastRemoteObject.exportObject(repo1, 0);
       Registry registry = LocateRegistry.getRegistry();
       registry.bind(repo.getRepositoryName(), repo);
+      registry.bind(repo1.getRepositoryName(), repo1);
       out.println("Servidor de peças iniciado");
     } catch (Exception e) {
       System.err.println("Ocorreu um erro no servidor: " + e.toString());
