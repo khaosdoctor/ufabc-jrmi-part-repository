@@ -8,8 +8,6 @@ package jrmipartssystem;
 import java.rmi.registry.LocateRegistry;
 import java.rmi.registry.Registry;
 import static java.lang.System.out;
-import java.lang.reflect.InvocationTargetException;
-import java.rmi.AccessException;
 import java.rmi.NotBoundException;
 import java.rmi.RemoteException;
 import java.util.Arrays;
@@ -17,7 +15,6 @@ import java.util.Scanner;
 import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javafx.scene.input.InputMethodTextRun;
 
 /**
  *
